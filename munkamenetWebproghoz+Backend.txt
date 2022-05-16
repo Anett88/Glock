@@ -1,0 +1,115 @@
+cd desktop
+composer create-project --prefer-dist laravel/laravel {PROJEKT NEVE}
+composer require laravel/breeze --dev
+php artisan breeze:install
+npm install
+npm run dev
+
+--ab létrehozása + env
+
+--controllerek létrehozása:
+php artisan make:controller {KONTROLLERNEVE}Controller -m
+
+--controllerek megírása az alap függvényekekkel, API végpontok létrehozása (4 függvény)
+	**Jelen esetben a modell neve task**
+	use App\Models\Task;
+	-GET (index):
+		public function index()
+    		{
+        		$tasks=Task::all();
+        		return response()->json($tasks);
+    		}
+	-POST (store):
+		public function store(Request $request)
+    		{
+        		$task=new Task();
+
+        		$task->title=$request->title;
+
+        		$task->save();
+    		}
+	-PUT (update):
+		public function update(Request $request, $taskId)
+    		{
+        		$task=Task::find($taskId);
+        		
+			$task->title=$request->title;
+       
+        		$task->save();
+    		}
+	-DELET (destroy):
+		public function destroy($taskId)
+    		{
+        		$task=Task::find($taskId);
+        		$task->delete();
+    		}
+
+--modellek létrehozása:
+php artisan make:model {MODELLNEVE} -m
+
+--database modellek/ adattáblák feltöltése minta szerint oszlopokkal
+	//fő kulcs
+        $table->increments('jogosultsag_id');	
+
+	$table->string('nev');
+        $table->timestamps();
+
+	->
+
+	//fő kulcs
+	$table->increments('szemely_id'); 	
+
+	//kűlső kulcs	
+	$table->integer('jogosultsag_id')->unsigned(); 		
+	$table->foreign('jogosultsag_id')->references('jogosultsag_id')->on('jogosultasgs');
+
+	$table->string('email_cim');
+	$table->string('jelszo');
+	$table->string('nev');
+	$table->date('szul_datum');
+	$table->string('neme');
+	$table->string('igazolvany_szam');
+	$table->string('igazolvany_tipusa');
+	$table->integer('tel_szam');
+	$table->string('kep');
+        $table->timestamps();
+
+--app modellek feltöltése jó adattagokkal:
+ 	-protected $filler = ['berlet_tipus_id', 'ugyfel', 'datum_tol', 'datum_ig'];
+		
+php artisan migrate
+
+--seeder vagy localhoston belül próba adatok
+--SEEDER:
+	-php artisan make:seeder {TÁBLA NEVE}Seeder
+	-seeder feltöltése adattal: 
+		DB::table('eszkozs')->insert([
+            		['eszkoz_tipus_szamlalo' => '1','terem_id' => '1','qr_kod' => 'Null']
+		]);
+	-DatabaseSeederbe: $this->call([{SEEDER NEVE}::class]);		
+	-php artisan db:seed
+
+--API-k létrehozása
+	-web.php: Route::apiResource('{ELÉRÉSI CÍM NEVE}', {CONTROLLER NEVE}::class);
+
+--ajax.js Ajax oszály (tokennel)
+
+	-constructor(token){this.token=token;}
+	-post,put,delete: headers: {'X-CSRF-TOKEN': this.token},
+
+--weboldalak elkészítése, html css js:
+	-hmlt 5 oldal + css:
+		-meta tagbe token
+		-szulo, sablon
+		-formok létrehozása
+		-scriptek sorrendiség: ajax->osztály->osztályt kezelő script
+	-scrpipt.js:
+		-const token = $('meta[name="csrf-token"]').attr('content');
+		-ajaxot ezzel a tokennel hívni
+		-clonozo adatbeolvasás fuggvény
+		-uj adat, töröl, modósít gombok megírása 
+	-osztály.js:
+		-constructor
+		-setter
+		-kattintás triggerek
+		-click események
